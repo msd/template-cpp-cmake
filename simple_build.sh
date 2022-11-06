@@ -6,7 +6,7 @@ BUILD_DIR="$BASE_DIR/build"
 CONAN_PROFILE=""
 
 function using_conan {
-    return [[ -f "$SRC_DIR/conanfile.txt" ]]
+    return $( [[ -f "$SRC_DIR/conanfile.txt" ]] )
 }
 
 rm -rf "$BUILD_DIR/CMakeFiles/" "$BUILD_DIR/CMakeCache.txt"
@@ -17,12 +17,12 @@ cd "$BUILD_DIR"
 if using_conan; then
     if [[ "$CONAN_PROFILE" = "" ]]; then
         conan install "$SRC_DIR" --build=missing
-        if [[ $? -ne 0 ]]; then
-            echo "Conan failed"
-            exit 1
-        fi
     else
         conan install "$SRC_DIR" -pr="$CONAN_PROFILE" --build=missing
+    fi
+    if [[ $? -ne 0 ]]; then
+        echo "ERROR: Conan failed"
+        exit $(false)
     fi
     cmake "$SRC_DIR" -D CMAKE_TOOLCHAIN_FILE=conan_paths.cmake
 else
