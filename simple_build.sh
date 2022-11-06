@@ -3,19 +3,35 @@
 BASE_DIR=$(realpath $(dirname "$0"))
 SRC_DIR="$BASE_DIR/src"
 BUILD_DIR="$BASE_DIR/build"
+CONAN_PROFILE=""
 
-# delete build folder if it exists
-if [[ -d "$BUILD_DIR" ]]; then
-    rm -rf "$BUILD_DIR"
-fi
+function using_conan {
+    return [[ -f "$SRC_DIR/conanfile.txt" ]]
+}
 
-mkdir "$BUILD_DIR"
+rm -rf "$BUILD_DIR/CMakeFiles/" "$BUILD_DIR/CMakeCache.txt"
+
+mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 
-cmake "$SRC_DIR"
+if using_conan; then
+    if [[ "$CONAN_PROFILE" = "" ]]; then
+        conan install "$SRC_DIR" --build=missing
+        if [[ $? -ne 0 ]]; then
+            echo "Conan failed"
+            exit 1
+        fi
+    else
+        conan install "$SRC_DIR" -pr="$CONAN_PROFILE" --build=missing
+    fi
+    cmake "$SRC_DIR" -D CMAKE_TOOLCHAIN_FILE=conan_paths.cmake
+else
+    cmake "$SRC_DIR"
+fi
 
-# IF USING CONAN use the following two commands instead
-    # conan install "$SRC_DIR" -pr=PROFILE --build=missing
-    # cmake "$SRC_DIR" -D CMAKE_TOOLCHAIN_FILE=conan_paths.cmake
+if [[ $? -ne 0 ]];
+    echo "cmake failed to configure"
+    exit 1
+fi
 
 cmake --build .
