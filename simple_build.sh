@@ -29,7 +29,7 @@ else
     cmake "$SRC_DIR"
 fi
 
-if [[ $? -ne 0 ]];
+if [[ $? -ne 0 ]]; then
     echo "cmake failed to configure"
     exit 1
 fi
