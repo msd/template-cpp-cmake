@@ -1,0 +1,6 @@
+Simple cmake project, built using a single command (linux, mac, msys/cygwin).
+
+Requirements:
+cmake, c++ compiler, (optional) conan
+
+if you are not using conan remove `src/conanfile.txt` otherwise you might get some errors,
